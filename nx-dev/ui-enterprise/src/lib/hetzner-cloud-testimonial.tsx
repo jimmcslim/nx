@@ -82,9 +82,9 @@ export function HetznerCloudTestimonial(): ReactElement {
     <div className="border-b border-t border-slate-200 bg-slate-50 py-24 sm:py-32 dark:border-slate-800 dark:bg-slate-900">
       <section
         id="hetzner-cloud-testimonial"
-        className="z-0 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+        className="z-0 mx-auto max-w-7xl scroll-mt-20 px-4 sm:px-6 lg:px-8"
       >
-        <SectionHeading as="h2" variant="title" id="hetzner-cloud-testimonial">
+        <SectionHeading as="h2" variant="title">
           Nx Enterprise{' '}
           <span className="rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
             speeds build and test times
