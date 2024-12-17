@@ -7,8 +7,8 @@ import { MovingBorder } from '@nx/nx-dev/ui-animations';
 import { motion } from 'framer-motion';
 import { PlayIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { Dialog, Transition } from '@headlessui/react';
 import { sendCustomEvent } from '@nx/nx-dev/feature-analytics';
+import { VideoModal } from './video-modal';
 
 function PlayButton({
   className,
@@ -260,54 +260,13 @@ export function HetznerCloudTestimonial(): ReactElement {
             </blockquote>
           </figure>
         </div>
-        {/*MODAL*/}
-        <Transition appear show={isOpen} as={Fragment}>
-          <Dialog
-            as="div"
-            open={isOpen}
-            onClose={() => setIsOpen(false)}
-            className="relative z-10"
-          >
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" />
-            </Transition.Child>
-            <div className="fixed inset-0 overflow-y-auto">
-              <div className="flex min-h-full items-center justify-center p-4 text-center">
-                <Transition.Child
-                  as={Fragment}
-                  enter="ease-out duration-300"
-                  enterFrom="opacity-0 scale-95"
-                  enterTo="opacity-100 scale-100"
-                  leave="ease-in duration-200"
-                  leaveFrom="opacity-100 scale-100"
-                  leaveTo="opacity-0 scale-95"
-                >
-                  <Dialog.Panel className="relative w-auto transform overflow-hidden rounded-2xl border border-slate-950 bg-black text-left align-middle shadow-xl transition-all focus:outline-none">
-                    <iframe
-                      width="808"
-                      height="454"
-                      src="https://www.youtube.com/embed/2BLqiNnBPuU?si=752RGHhozOMzbWlx"
-                      title="YouTube video player"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      className="max-w-full"
-                    />
-                  </Dialog.Panel>
-                </Transition.Child>
-              </div>
-            </div>
-          </Dialog>
-        </Transition>
       </section>
+
+      <VideoModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        videoUrl="https://youtu.be/2BLqiNnBPuU"
+      />
     </div>
   );
 }
