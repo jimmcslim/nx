@@ -1,4 +1,5 @@
-import { existsSync, rmSync, watch, writeFileSync } from 'fs';
+import { existsSync, rmSync, watch, writeFileSync, mkdirSync } from 'fs';
+import { dirname } from 'path';
 
 export class FileLock {
   locked: boolean;
@@ -6,7 +7,10 @@ export class FileLock {
   private lockFilePath: string;
   lockPromise: Promise<void>;
 
-  constructor(private file: string) {
+  constructor(file: string) {
+    // Ensure the directory exists
+    mkdirSync(dirname(file), { recursive: true });
+
     this.lockFilePath = `${file}.lock`;
     this.locked = existsSync(this.lockFilePath);
   }
@@ -16,7 +20,7 @@ export class FileLock {
       throw new Error(`File ${this.lockFilePath} is already locked`);
     }
     this.locked = true;
-    writeFileSync(this.file, '');
+    writeFileSync(this.lockFilePath, '');
   }
 
   unlock() {
@@ -24,26 +28,35 @@ export class FileLock {
       throw new Error(`File ${this.lockFilePath} is not locked`);
     }
     this.locked = false;
-    rmSync(this.file);
+    try {
+      rmSync(this.lockFilePath);
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        throw err;
+      }
+    }
   }
 
   wait(timeout?: number) {
     return new Promise<void>((res, rej) => {
       try {
+        // If the file watcher is supported, we can use it to wait for the lock file to be deleted.
         let watcher = watch(this.lockFilePath);
-
         watcher.on('change', (eventType) => {
-          if (eventType === 'delete') {
+          // For whatever reason, the node file watcher can sometimes
+          // emit rename events instead of delete events.
+          if (eventType === 'delete' || eventType === 'rename') {
             this.locked = false;
-            res();
             watcher.close();
+            res();
           }
         });
       } catch {
         // File watching is not supported
         let start = Date.now();
-        setInterval(() => {
-          if (!this.locked || !existsSync(this.file)) {
+        let interval = setInterval(() => {
+          if (!this.locked || !existsSync(this.lockFilePath)) {
+            clearInterval(interval);
             res();
           }
 

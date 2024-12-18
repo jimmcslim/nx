@@ -25,6 +25,7 @@ import {
 import {
   readFileMapCache,
   readProjectGraphCache,
+  readSourceMapsCache,
   writeCache,
 } from './nx-deps-cache';
 import { ConfigurationResult } from './utils/project-configuration-utils';
@@ -170,7 +171,7 @@ export async function buildProjectGraphAndSourceMapsWithoutDaemon() {
     throw new ProjectGraphError(errors, projectGraph, sourceMaps);
   } else {
     if (cacheEnabled) {
-      writeCache(projectFileMapCache, projectGraph);
+      writeCache(projectFileMapCache, projectGraph, sourceMaps);
     }
     return { projectGraph, sourceMaps };
   }
@@ -280,7 +281,16 @@ export async function createProjectGraphAndSourceMapsAsync(
         'Waiting for graph construction in another process to complete'
       );
       await lock.wait();
-      return { projectGraph: readCachedGraphAndHydrateFileMap() };
+      const sourceMaps = readSourceMapsCache();
+      if (!sourceMaps) {
+        throw new Error(
+          'The project graph was computed in another process, but the source maps are missing.'
+        );
+      }
+      return {
+        projectGraph: await readCachedGraphAndHydrateFileMap(),
+        sourceMaps,
+      };
     }
     lock.lock();
     try {
